@@ -66,6 +66,32 @@ class Note(object):
         self.note = self._note
         self._idx = NOTES.index(self.note)
 
+# then there were triads
+class Triad(object):
+    def __init__(self, note, triad_type):
+        self.tonic = Note(note.note)
+        self.triad_type = triad_type
+        self.notes = [self.tonic, None, None]
+        self._create()
+
+    def __str__(self):
+        s = ""
+        for note in self.notes:
+            s += ("%s - " % note.note)
+        return s[:-2]
+
+    def _create(self):
+        self.notes[0] = self.tonic # add root note
+
+        root = self.tonic
+        if self.triad_type == "major":
+            self.notes[1] = Note(root.sharpen(4)) # major 3rd
+        elif self.triad_type == "minor":
+            self.notes[1] = Note(root.sharpen(3)) # minor 3rd
+        root.reset()
+        self.notes[2] = Note(root.sharpen(7)) # perfect 5th
+        root.reset()
+
 # then there were tetrachords
 class Tetrachord(object):
     def __init__(self, note):
@@ -133,6 +159,7 @@ print "Scale: %s" % s
 
 ######################################################################################## ♫
 ## TODO
-# Note.sharpen/flatten modifies the actual value, we should instead return a new Note object in the altered state
-# Interactive environment parsing
+# [ ] Note.sharpen/flatten modifies the actual value, we should instead return a new Note object in the altered state
+# [ ] Detect when 'note' is passed - is instance or string? Deal accordingly
+# [ ] Interactive environment parsing
 
