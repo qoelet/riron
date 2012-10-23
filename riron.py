@@ -18,6 +18,7 @@ import argparse
 # in the beginning, we have notes. 
 # A, A#/Bb, B, C, C#/Db, D, D#/Eb, E, F, F#/Gb, G, G#/Ab.. (back to A)
 NOTES = ('A', 'A#/Bb', 'B', 'C', 'C#/Db', 'D', 'D#/Eb', 'E', 'F', 'F#/Gb', 'G', 'G#/Ab')
+MINOR_CHOICES = ("harmonic", "melodic", "natural")
 
 # let's make a class Note
 class Note(object):
@@ -32,7 +33,18 @@ class Note(object):
             self._idx = NOTES.index(note)
             self.note = note
         except ValueError:
-            print "- Invalid note assigned: %s is not in %s" % (note, NOTES)
+            if len(note) == 2:
+                try:
+                    enharmonic = None
+                    for n in NOTES:
+                        if note in n:
+                            enharmonic = n
+                    self._idx = NOTES.index(enharmonic)
+                    self.note = enharmonic
+                except:
+                    print "- Invalid note assigned: %s is not in %s" % (note, NOTES)
+            else:
+                print "- Invalid note assigned: %s is not in %s" % (note, NOTES)
 
     def __str__(self):
         return self.note
@@ -145,7 +157,23 @@ class Scale(object):
         return self.notes
 
     def minor(self, minor_type="natural"):  # assumes natural unless specified: harmonic, melodic
-        pass
+        assert minor_type in MINOR_CHOICES and self.scale_type == "minor"
+        if minor_type == "natural":
+            self.notes = [None] * 8
+            self.notes[0] = self.tonic # add root note
+
+            root = self.tonic
+            self.notes[1] = Note(root.sharpen(2))
+            self.notes[2] = Note(root.sharpen(1))
+            self.notes[3] = Note(root.sharpen(2))
+            self.notes[4] = Note(root.sharpen(2)) # link
+            self.notes[5] = Note(root.sharpen(1))
+            self.notes[6] = Note(root.sharpen(2))
+            self.notes[7] = Note(root.sharpen(2))
+
+            root.reset
+
+            return self.notes
 
 ######################################################################################## ♫
 ## TESTS
@@ -156,7 +184,10 @@ print "Creating major scale for note."
 s = Scale(n, "major")
 s.major()
 print "Scale: %s" % s
-
+print "Creating minor (natural) scale for note."
+s = Scale(n, "minor")
+s.minor("natural")
+print "Scale: %s" % s
 ######################################################################################## ♫
 ## TODO
 # [ ] Note.sharpen/flatten modifies the actual value, we should instead return a new Note object in the altered state
